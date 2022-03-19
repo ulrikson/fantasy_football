@@ -12,7 +12,7 @@ class FPL:
 
         self.must_be_higher_than_zero = ['value_season', 'form', 'minutes']
 
-    def getSlimElementsDf(self):
+    def getPlayerDF(self):
         slim_elements_df = self.elements_df[['second_name', 'team', 'element_type', 'selected_by_percent',
                                              'now_cost', 'minutes', 'transfers_in', 'value_season', 'total_points', 'form']]
 
