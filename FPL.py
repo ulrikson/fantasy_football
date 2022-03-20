@@ -16,7 +16,7 @@ class FPL:
         df = self.elements_df[['second_name', 'team', 'element_type',
                                'now_cost', 'minutes', 'value_season', 'total_points', 'form']]
 
-        df['position'] = df.element_type.map(
+        df['element_type'] = df.element_type.map(
             self.elements_types_df.set_index('id').singular_name)
 
         df['team'] = df.team.map(
@@ -45,7 +45,7 @@ class FPL:
 
     def dfPerPosition(self, position, sort_by):
         df = self.getPlayerDf()
-        df = df.loc[df.position == position]
+        df = df.loc[df.element_type == position]
         df = df.sort_values(sort_by, ascending=False)
 
         return df
