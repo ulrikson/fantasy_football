@@ -2,18 +2,16 @@ import pandas as pd
 import numpy as np
 
 
-class FPL:
-    def __init__(self, json, unwanted_teams):
+class Fantasy:
+    def __init__(self, json, unwanted_teams, higher_than_zero):
         self.json = json
-
-        self.unwanted_teams = unwanted_teams
 
         self.elements_df = pd.DataFrame(json['elements'])
         self.elements_types_df = pd.DataFrame(json['element_types'])
         self.teams_df = pd.DataFrame(json['teams'])
 
-        self.must_be_higher_than_zero = [
-            'value_season', 'form', 'value_form', 'minutes']
+        self.unwanted_teams = unwanted_teams
+        self.higher_than_zero = higher_than_zero
 
     def getPlayerDf(self):
         df = self.elements_df[['second_name', 'team', 'element_type',
@@ -37,7 +35,7 @@ class FPL:
         return df
 
     def removeZeroValues(self, df):
-        for column in self.must_be_higher_than_zero:
+        for column in self.higher_than_zero:
             df[column] = df[column].astype(float)
             df = df.loc[df[column] > 0]
 
