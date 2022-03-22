@@ -3,14 +3,17 @@ import numpy as np
 
 
 class FPL:
-    def __init__(self, json):
+    def __init__(self, json, unwanted_teams):
         self.json = json
+
+        self.unwanted_teams = unwanted_teams
 
         self.elements_df = pd.DataFrame(json['elements'])
         self.elements_types_df = pd.DataFrame(json['element_types'])
         self.teams_df = pd.DataFrame(json['teams'])
 
-        self.must_be_higher_than_zero = ['value_season', 'form', 'value_form', 'minutes']
+        self.must_be_higher_than_zero = [
+            'value_season', 'form', 'value_form', 'minutes']
 
     def getPlayerDf(self):
         df = self.elements_df[['second_name', 'team', 'element_type',
@@ -22,7 +25,14 @@ class FPL:
         df['team'] = df.team.map(
             self.teams_df.set_index('id').name)
 
+        df = self.removeUnwantedTeams(df)
         df = self.removeZeroValues(df)
+
+        return df
+
+    def removeUnwantedTeams(self, df):
+        for team in self.unwanted_teams:
+            df = df.loc[df.team != team]
 
         return df
 
