@@ -10,11 +10,11 @@ class FPL:
         self.elements_types_df = pd.DataFrame(json['element_types'])
         self.teams_df = pd.DataFrame(json['teams'])
 
-        self.must_be_higher_than_zero = ['value_season', 'form', 'minutes']
+        self.must_be_higher_than_zero = ['value_season', 'form', 'value_form', 'minutes']
 
     def getPlayerDf(self):
         df = self.elements_df[['second_name', 'team', 'element_type',
-                               'now_cost', 'minutes', 'value_season', 'total_points', 'form']]
+                               'now_cost', 'minutes', 'value_season', 'total_points', 'form', 'value_form']]
 
         df['element_type'] = df.element_type.map(
             self.elements_types_df.set_index('id').singular_name)
