@@ -43,9 +43,9 @@ class FPL:
 
         return pivot
 
-    def dfPerPosition(self, position, sort_by):
+    def dfFiltered(self, column, element, sort_by):
         df = self.getPlayerDf()
-        df = df.loc[df.element_type == position]
+        df = df.loc[df[column] == element]
         df = df.sort_values(sort_by, ascending=False)
 
         return df
