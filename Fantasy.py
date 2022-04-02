@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Fantasy:
-    def __init__(self, json, unwanted_teams, higher_than_zero):
+    def __init__(self, json, unwanted_teams, higher_than):
         self.json = json
 
         self.elements_df = pd.DataFrame(json['elements'])
@@ -11,7 +11,7 @@ class Fantasy:
         self.teams_df = pd.DataFrame(json['teams'])
 
         self.unwanted_teams = unwanted_teams
-        self.higher_than_zero = higher_than_zero
+        self.higher_than = higher_than
 
     def getPlayerDf(self):
         df = self.elements_df[['web_name', 'team', 'element_type', 'points_per_game',
@@ -24,7 +24,7 @@ class Fantasy:
             self.teams_df.set_index('id').name)
 
         df = self.removeUnwantedTeams(df)
-        df = self.removeZeroValues(df)
+        df = self.removeLowValues(df)
 
         df['value_season_adj'] = df['value_season'] / (df['total_points'] / df['points_per_game'])
 
@@ -36,10 +36,10 @@ class Fantasy:
 
         return df
 
-    def removeZeroValues(self, df):
-        for column in self.higher_than_zero:
-            df[column] = df[column].astype(float)
-            df = df.loc[df[column] > 0]
+    def removeLowValues(self, df):
+        for key, value in self.higher_than.items():
+            df[key] = df[key].astype(float)
+            df = df.loc[df[key] > value]
 
         return df
 
