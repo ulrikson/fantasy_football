@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 import requests
 
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 class Fantasy:
     def __init__(self, league, unwanted_teams, higher_than, max_cost):
@@ -113,3 +119,21 @@ class Fantasy:
         df = df.sort_values(sort_by, ascending=False)
 
         return df
+    
+    def getBarPlot(self, column, element):
+        pivot = self.createPivot(column, element).sort_values(element)
+
+        pivot.plot(kind='barh', x=column, figsize=(10, 6))
+
+
+    def getScatterPlot(self,position, x, y):
+        df = self.dfFiltered('element_type', position, 'value_season_adj')
+
+        ax = df.plot.scatter(x=x, y=y, alpha=.5, figsize=(
+            20, 10), title=f"{position}: {x} v {y}")
+
+        for i, txt in enumerate(df.web_name):
+            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
+
+        plt.grid(which='both', axis='both', ls='-')
+        plt.show()
