@@ -14,7 +14,7 @@ class Fantasy:
         self.higher_than_zero = higher_than_zero
 
     def getPlayerDf(self):
-        df = self.elements_df[['second_name', 'team', 'element_type',
+        df = self.elements_df[['web_name', 'team', 'element_type', 'points_per_game',
                                'now_cost', 'minutes', 'value_season', 'total_points', 'form', 'value_form']]
 
         df['element_type'] = df.element_type.map(
@@ -25,6 +25,8 @@ class Fantasy:
 
         df = self.removeUnwantedTeams(df)
         df = self.removeZeroValues(df)
+
+        df['value_season_adj'] = df['value_season'] / (df['total_points'] / df['points_per_game'])
 
         return df
 
