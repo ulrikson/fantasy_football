@@ -3,9 +3,11 @@ import numpy as np
 import requests
 
 import matplotlib.pyplot as plt
-plt.style.use('ggplot')
+
+plt.style.use("ggplot")
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -119,21 +121,73 @@ class Fantasy:
         df = df.sort_values(sort_by, ascending=False)
 
         return df
-    
+
+    def getTopTeam(self):
+        gk_df = self.dfFiltered("element_type", "Goalkeeper", "value_season_adj").head(
+            2
+        )
+        def_df = self.dfFiltered("element_type", "Defender", "value_season_adj").head(5)
+        mid_df = self.dfFiltered("element_type", "Midfielder", "value_season_adj").head(
+            5
+        )
+        fwd_df = self.dfFiltered("element_type", "Forward", "value_season_adj").head(3)
+
+        top = gk_df.append(def_df).append(mid_df).append(fwd_df)
+
+        return top
+
     def getBarPlot(self, column, element):
         pivot = self.createPivot(column, element).sort_values(element)
 
-        pivot.plot(kind='barh', x=column, figsize=(10, 6))
+        pivot.plot(kind="barh", x=column, figsize=(10, 6))
 
+    def getPlayerScatterPlot(self, position, x, y):
+        df = self.dfFiltered("element_type", position, "value_season_adj")
 
-    def getScatterPlot(self,position, x, y):
-        df = self.dfFiltered('element_type', position, 'value_season_adj')
-
-        ax = df.plot.scatter(x=x, y=y, alpha=.5, figsize=(
-            20, 10), title=f"{position}: {x} v {y}")
+        ax = df.plot.scatter(
+            x=x, y=y, alpha=0.5, figsize=(20, 10), title=f"{position}: {x} v {y}"
+        )
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-        plt.grid(which='both', axis='both', ls='-')
+        plt.grid(which="both", axis="both", ls="-")
         plt.show()
+
+    def getMVPScatterPlot(self):
+        x = "total_points"
+        y = "value_season_adj"
+
+        top_gk = self.dfFiltered("element_type", "Goalkeeper", x).head()
+        top_def = self.dfFiltered("element_type", "Defender", x).head()
+        top_mid = self.dfFiltered("element_type", "Midfielder", x).head()
+        top_fwd = self.dfFiltered("element_type", "Forward", x).head()
+
+        ax = top_gk.plot.scatter(
+            x=x,
+            y=y,
+            color="DarkBlue",
+            label="GK",
+            s=top_gk[x],
+            alpha=0.5,
+            figsize=(15, 10),
+            title="Top 5 Players by Position",
+        )
+        for i, txt in enumerate(top_gk.web_name):
+            ax.annotate(txt, (top_gk[x].iat[i], top_gk[y].iat[i]))
+
+        top_def.plot.scatter(
+            x=x, y=y, color="DarkGreen", label="DEF", s=top_gk[x], ax=ax
+        )
+        for i, txt in enumerate(top_def.web_name):
+            ax.annotate(txt, (top_def[x].iat[i], top_def[y].iat[i]))
+
+        top_mid.plot.scatter(
+            x=x, y=y, color="DarkOrange", label="MID", s=top_gk[x], ax=ax
+        )
+        for i, txt in enumerate(top_mid.web_name):
+            ax.annotate(txt, (top_mid[x].iat[i], top_mid[y].iat[i]))
+
+        top_fwd.plot.scatter(x=x, y=y, color="DarkRed", label="FWD", s=top_gk[x], ax=ax)
+        for i, txt in enumerate(top_fwd.web_name):
+            ax.annotate(txt, (top_fwd[x].iat[i], top_fwd[y].iat[i]))
