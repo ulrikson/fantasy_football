@@ -149,49 +149,34 @@ class Fantasy:
     def getPlayerScatterPlot(self, position, x, y, regline):
         df = self.dfFiltered("element_type", position, "value_season_adj")
 
+        min = df["now_cost"].min()
+        max = df["now_cost"].max()
+
         if regline:
             ax = sns.regplot(x=x, y=y, data=df)
         else:
-            ax = sns.scatterplot(x=x, y=y, data=df)
+            ax = sns.scatterplot(x=x, y=y, data=df, size="now_cost", sizes=(min, max))
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
     def getMVPScatterPlot(self):
-        x = "total_points"
+        x = "form"
         y = "value_season_adj"
 
-        top_gk = self.dfFiltered("element_type", "Goalkeeper", x).head()
-        top_def = self.dfFiltered("element_type", "Defender", x).head()
-        top_mid = self.dfFiltered("element_type", "Midfielder", x).head()
-        top_fwd = self.dfFiltered("element_type", "Forward", x).head()
+        top_gk = self.dfFiltered("element_type", "Goalkeeper", "total_points").head()
+        top_def = self.dfFiltered("element_type", "Defender", "total_points").head()
+        top_mid = self.dfFiltered("element_type", "Midfielder", "total_points").head()
+        top_fwd = self.dfFiltered("element_type", "Forward", "total_points").head()
 
-        ax = top_gk.plot.scatter(
-            x=x,
-            y=y,
-            color="DarkBlue",
-            label="GK",
-            s=top_gk[x],
-            alpha=0.5,
-            figsize=(15, 10),
-            title="Top 5 Players by Position",
+        df = top_gk.append(top_def).append(top_mid).append(top_fwd)
+
+        min = df["now_cost"].min()
+        max = df["now_cost"].max()
+
+        ax = sns.scatterplot(
+            x=x, y=y, data=df, hue="element_type", size="now_cost", sizes=(min, max)
         )
 
-        for i, txt in enumerate(top_gk.web_name):
-            ax.annotate(txt, (top_gk[x].iat[i], top_gk[y].iat[i]))
-
-        top_def.plot.scatter(
-            x=x, y=y, color="DarkGreen", label="DEF", s=top_gk[x], ax=ax
-        )
-        for i, txt in enumerate(top_def.web_name):
-            ax.annotate(txt, (top_def[x].iat[i], top_def[y].iat[i]))
-
-        top_mid.plot.scatter(
-            x=x, y=y, color="DarkOrange", label="MID", s=top_gk[x], ax=ax
-        )
-        for i, txt in enumerate(top_mid.web_name):
-            ax.annotate(txt, (top_mid[x].iat[i], top_mid[y].iat[i]))
-
-        top_fwd.plot.scatter(x=x, y=y, color="DarkRed", label="FWD", s=top_gk[x], ax=ax)
-        for i, txt in enumerate(top_fwd.web_name):
-            ax.annotate(txt, (top_fwd[x].iat[i], top_fwd[y].iat[i]))
+        for i, txt in enumerate(df.web_name):
+            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
