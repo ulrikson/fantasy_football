@@ -1,18 +1,31 @@
 import pandas as pd
 import numpy as np
+import requests
 
 
 class Fantasy:
-    def __init__(self, json, unwanted_teams, higher_than, max_cost):
-        self.json = json
+    def __init__(self, league, unwanted_teams, higher_than, max_cost):
+        self.league = league
 
-        self.elements_df = pd.DataFrame(json["elements"])
-        self.elements_types_df = pd.DataFrame(json["element_types"])
-        self.teams_df = pd.DataFrame(json["teams"])
+        self.json = self.getJson()
+        self.elements_df = pd.DataFrame(self.json["elements"])
+        self.elements_types_df = pd.DataFrame(self.json["element_types"])
+        self.teams_df = pd.DataFrame(self.json["teams"])
 
         self.unwanted_teams = unwanted_teams
         self.higher_than = higher_than
         self.max_cost = max_cost
+
+    def getJson(self):
+        if self.league == "fpl":
+            url = "https://fantasy.premierleague.com/api/bootstrap-static/"
+        else:
+            url = "https://fantasy.allsvenskan.se/api/bootstrap-static/"
+
+        response = requests.get(url)
+        json = response.json()
+
+        return json
 
     def getPlayerDf(self):
         df = self.elements_df[
@@ -35,6 +48,15 @@ class Fantasy:
         )
 
         df["team"] = df.team.map(self.teams_df.set_index("id").name)
+
+        df["element_type"] = df["element_type"].replace(
+            {
+                "Målvakt": "Goalkeeper",
+                "Försvarare": "Defender",
+                "Mittfältare": "Midfielder",
+                "Anfallare": "Forward",
+            }
+        )
 
         df = self.removeUnwantedTeams(df)
         df = self.stringToFloat(df)
