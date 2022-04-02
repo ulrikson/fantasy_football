@@ -9,7 +9,6 @@ plt.style.use("ggplot")
 import seaborn as sns
 
 sns.set_theme(color_codes=True)
-sns.set(rc={"figure.figsize": (20, 10)})
 
 import warnings
 
@@ -144,7 +143,10 @@ class Fantasy:
     def getBarPlot(self, column, element):
         pivot = self.createPivot(column, element).sort_values(element)
 
-        pivot.plot(kind="barh", x=column, figsize=(10, 6))
+        fig = plt.gcf()
+        fig.set_size_inches(10, 8)
+
+        sns.barplot(x=element, y=column, data=pivot)
 
     def getPlayerScatterPlot(self, position, x, y, regline):
         df = self.dfFiltered("element_type", position, "value_season_adj")
@@ -156,6 +158,9 @@ class Fantasy:
             ax = sns.regplot(x=x, y=y, data=df)
         else:
             ax = sns.scatterplot(x=x, y=y, data=df, size="now_cost", sizes=(min, max))
+
+        fig = plt.gcf()
+        fig.set_size_inches(20, 10)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
@@ -177,6 +182,9 @@ class Fantasy:
         ax = sns.scatterplot(
             x=x, y=y, data=df, hue="element_type", size="now_cost", sizes=(min, max)
         )
+
+        fig = plt.gcf()
+        fig.set_size_inches(20, 10)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
