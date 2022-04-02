@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 
 plt.style.use("ggplot")
 
+import seaborn as sns
+
+sns.set_theme(color_codes=True)
+sns.set(rc={"figure.figsize": (20, 10)})
+
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -141,18 +146,16 @@ class Fantasy:
 
         pivot.plot(kind="barh", x=column, figsize=(10, 6))
 
-    def getPlayerScatterPlot(self, position, x, y):
+    def getPlayerScatterPlot(self, position, x, y, regline):
         df = self.dfFiltered("element_type", position, "value_season_adj")
 
-        ax = df.plot.scatter(
-            x=x, y=y, alpha=0.5, figsize=(20, 10), title=f"{position}: {x} v {y}"
-        )
+        if regline:
+            ax = sns.regplot(x=x, y=y, data=df)
+        else:
+            ax = sns.scatterplot(x=x, y=y, data=df)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
-
-        plt.grid(which="both", axis="both", ls="-")
-        plt.show()
 
     def getMVPScatterPlot(self):
         x = "total_points"
@@ -173,6 +176,7 @@ class Fantasy:
             figsize=(15, 10),
             title="Top 5 Players by Position",
         )
+
         for i, txt in enumerate(top_gk.web_name):
             ax.annotate(txt, (top_gk[x].iat[i], top_gk[y].iat[i]))
 
