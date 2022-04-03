@@ -40,6 +40,18 @@ class Fantasy:
         return json
 
     def get_player_df(self):
+        df = self.__get_relevant_columns()
+        df = self.__map_values(df)
+        df = self.__replace_translation(df)
+        df = self.__remove_unwanted_teams(df)
+        df = self.__string_to_float(df)
+        df = df[df["now_cost"] < self.max_cost]
+        df = self.__get_value_adjusted(df)
+        df = self.__remove_low_values(df)
+
+        return df
+
+    def __get_relevant_columns(self):
         df = self.elements_df[
             [
                 "web_name",
@@ -55,22 +67,14 @@ class Fantasy:
             ]
         ]
 
+        return df
+
+    def __map_values(self, df):
         df["element_type"] = df.element_type.map(
             self.elements_types_df.set_index("id").singular_name
         )
 
         df["team"] = df.team.map(self.teams_df.set_index("id").name)
-
-        df = self.__replace_translation(df)
-
-        df = self.__remove_unwanted_teams(df)
-        df = self.__string_to_float(df)
-
-        df = df[df["now_cost"] < self.max_cost]
-
-        df = self.__get_value_adjusted(df)
-
-        df = self.__remove_low_values(df)
 
         return df
 
@@ -121,7 +125,7 @@ class Fantasy:
         return df
 
     def create_pivot(self, index, value):
-        df = self.getPlayerDf()
+        df = self.get_player_df()
 
         pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
 
@@ -130,7 +134,7 @@ class Fantasy:
         return pivot
 
     def df_filtered(self, column, element, sort_by):
-        df = self.getPlayerDf()
+        df = self.get_player_df()
         df = df.loc[df[column] == element]
         df = df.sort_values(sort_by, ascending=False)
 
