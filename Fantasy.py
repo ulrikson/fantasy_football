@@ -154,18 +154,15 @@ class Fantasy:
 
         sns.barplot(x=element, y=column, data=pivot)
 
-    def getPlayerScatterPlot(self, position, x, y, regline):
+    def getPlayerScatterPlot(self, position, x, y):
         df = self.dfFiltered("element_type", position, "value_season_adj")
 
         min = df["now_cost"].min()
         max = df["now_cost"].max()
 
-        if regline:
-            ax = sns.regplot(x=x, y=y, data=df)
-        else:
-            ax = sns.scatterplot(
-                x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
-            )
+        ax = sns.scatterplot(
+            x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
+        )
 
         fig = plt.gcf()
         fig.set_size_inches(20, 10)
