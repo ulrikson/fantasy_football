@@ -127,20 +127,22 @@ class Fantasy:
         return df
 
     def __get_relevant_columns(self):
-        df = self.elements_df[
-            [
-                "web_name",
-                "team",
-                "element_type",
-                "points_per_game",
-                "now_cost",
-                "minutes",
-                "value_season",
-                "total_points",
-                "form",
-                "value_form",
-            ]
+        columns = [
+            "web_name",
+            "team",
+            "element_type",
+            "points_per_game",
+            "now_cost",
+            "minutes",
+            "value_season",
+            "total_points",
+            "form",
         ]
+
+        if self.league == "fpl":
+            columns.append("ict_index")
+
+        df = self.elements_df[columns]
 
         return df
 
@@ -179,8 +181,11 @@ class Fantasy:
             "value_season",
             "total_points",
             "form",
-            "value_form",
         ]
+
+        if self.league == "fpl":
+            columnsShouldBeFloat.append("ict_index")
+
         for column in columnsShouldBeFloat:
             df[column] = df[column].astype(float)
 
@@ -198,3 +203,29 @@ class Fantasy:
             df = df.loc[df[key] > value]
 
         return df
+
+    def get_top_performers(self):
+        df = self.get_player_df()
+
+        if self.league == "fpl":
+            form_top_value = df["form"].quantile(q=0.8)
+            value_top_value = df["value_season_adj"].quantile(q=0.8)
+            ict_top_value = df["ict_index"].quantile(q=0.8)
+
+            df = df[
+                (df["form"] >= form_top_value)
+                & (df["value_season_adj"] >= value_top_value)
+                & (df["ict_index"] >= ict_top_value)
+            ]
+        else:
+            # Higher q:s since no ICT
+            form_top_value = df["form"].quantile(q=0.9)
+            value_top_value = df["value_season_adj"].quantile(q=0.9)
+
+            df = df[
+                (df["form"] >= form_top_value)
+                & (df["value_season_adj"] >= value_top_value)
+            ]
+
+        return df.sort_values(by=['element_type', 'team'], ascending=False)
+
