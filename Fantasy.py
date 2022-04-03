@@ -39,6 +39,81 @@ class Fantasy:
 
         return json
 
+    def create_pivot(self, index, value):
+        df = self.get_player_df()
+
+        pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
+
+        pivot = pivot.sort_values(value, ascending=False)
+
+        return pivot
+
+    def df_filtered(self, column, element, sort_by):
+        df = self.get_player_df()
+        df = df.loc[df[column] == element]
+        df = df.sort_values(sort_by, ascending=False)
+
+        return df
+
+    def get_top_team(self):
+        gk_df = self.df_filtered("element_type", "Goalkeeper", "total_points").head(2)
+        def_df = self.df_filtered("element_type", "Defender", "total_points").head(5)
+        mid_df = self.df_filtered("element_type", "Midfielder", "total_points").head(5)
+        fwd_df = self.df_filtered("element_type", "Forward", "total_points").head(3)
+
+        top = gk_df.append(def_df).append(mid_df).append(fwd_df)
+
+        return top
+
+    def get_bar_plot(self, column, element):
+        pivot = self.create_pivot(column, element).sort_values(element)
+
+        fig = plt.gcf()
+        fig.set_size_inches(10, 8)
+
+        sns.barplot(x=element, y=column, data=pivot)
+
+    def get_player_scatterplot(self, position, x, y):
+        df = self.df_filtered("element_type", position, "value_season_adj")
+
+        min = df["now_cost"].min()
+        max = df["now_cost"].max()
+
+        ax = sns.scatterplot(
+            x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
+        )
+
+        fig = plt.gcf()
+        fig.set_size_inches(20, 10)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
+
+        for i, txt in enumerate(df.web_name):
+            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
+
+    def get_mvp_scatterplot(self):
+        x = "form"
+        y = "value_season_adj"
+
+        top_gk = self.df_filtered("element_type", "Goalkeeper", "total_points").head()
+        top_def = self.df_filtered("element_type", "Defender", "total_points").head()
+        top_mid = self.df_filtered("element_type", "Midfielder", "total_points").head()
+        top_fwd = self.df_filtered("element_type", "Forward", "total_points").head()
+
+        df = top_gk.append(top_def).append(top_mid).append(top_fwd)
+
+        min = df["now_cost"].min()
+        max = df["now_cost"].max()
+
+        ax = sns.scatterplot(
+            x=x, y=y, data=df, hue="element_type", size="now_cost", sizes=(min, max)
+        )
+
+        fig = plt.gcf()
+        fig.set_size_inches(20, 10)
+
+        for i, txt in enumerate(df.web_name):
+            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
+
     def get_player_df(self):
         df = self.__get_relevant_columns()
         df = self.__map_values(df)
@@ -123,78 +198,3 @@ class Fantasy:
             df = df.loc[df[key] > value]
 
         return df
-
-    def create_pivot(self, index, value):
-        df = self.get_player_df()
-
-        pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
-
-        pivot = pivot.sort_values(value, ascending=False)
-
-        return pivot
-
-    def df_filtered(self, column, element, sort_by):
-        df = self.get_player_df()
-        df = df.loc[df[column] == element]
-        df = df.sort_values(sort_by, ascending=False)
-
-        return df
-
-    def get_top_team(self):
-        gk_df = self.df_filtered("element_type", "Goalkeeper", "total_points").head(2)
-        def_df = self.df_filtered("element_type", "Defender", "total_points").head(5)
-        mid_df = self.df_filtered("element_type", "Midfielder", "total_points").head(5)
-        fwd_df = self.df_filtered("element_type", "Forward", "total_points").head(3)
-
-        top = gk_df.append(def_df).append(mid_df).append(fwd_df)
-
-        return top
-
-    def get_bar_plot(self, column, element):
-        pivot = self.create_pivot(column, element).sort_values(element)
-
-        fig = plt.gcf()
-        fig.set_size_inches(10, 8)
-
-        sns.barplot(x=element, y=column, data=pivot)
-
-    def get_player_scatterplot(self, position, x, y):
-        df = self.df_filtered("element_type", position, "value_season_adj")
-
-        min = df["now_cost"].min()
-        max = df["now_cost"].max()
-
-        ax = sns.scatterplot(
-            x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
-        )
-
-        fig = plt.gcf()
-        fig.set_size_inches(20, 10)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
-
-        for i, txt in enumerate(df.web_name):
-            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
-
-    def get_mvp_scatterplot(self):
-        x = "form"
-        y = "value_season_adj"
-
-        top_gk = self.df_filtered("element_type", "Goalkeeper", "total_points").head()
-        top_def = self.df_filtered("element_type", "Defender", "total_points").head()
-        top_mid = self.df_filtered("element_type", "Midfielder", "total_points").head()
-        top_fwd = self.df_filtered("element_type", "Forward", "total_points").head()
-
-        df = top_gk.append(top_def).append(top_mid).append(top_fwd)
-
-        min = df["now_cost"].min()
-        max = df["now_cost"].max()
-
-        ax = sns.scatterplot(
-            x=x, y=y, data=df, hue="element_type", size="now_cost", sizes=(min, max)
-        )
-
-        fig = plt.gcf()
-        fig.set_size_inches(20, 10)
-
-        for i, txt in enumerate(df.web_name):
-            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
