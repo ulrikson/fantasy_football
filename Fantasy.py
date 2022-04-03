@@ -61,6 +61,20 @@ class Fantasy:
 
         df["team"] = df.team.map(self.teams_df.set_index("id").name)
 
+        df = self.replaceTranslation(df)
+
+        df = self.removeUnwantedTeams(df)
+        df = self.stringToFloat(df)
+
+        df = df[df["now_cost"] < self.max_cost]
+
+        df = self.getValueAdjusted(df)
+
+        df = self.removeLowValues(df)
+
+        return df
+
+    def replaceTranslation(self, df):
         df["element_type"] = df["element_type"].replace(
             {
                 "Målvakt": "Goalkeeper",
@@ -69,17 +83,6 @@ class Fantasy:
                 "Anfallare": "Forward",
             }
         )
-
-        df = self.removeUnwantedTeams(df)
-        df = self.stringToFloat(df)
-
-        df["value_season_adj"] = df["value_season"] / (
-            df["total_points"] / df["points_per_game"]
-        )
-
-        df = df[df["now_cost"] < self.max_cost]
-
-        df = self.removeLowValues(df)
 
         return df
 
@@ -101,6 +104,13 @@ class Fantasy:
         ]
         for column in columnsShouldBeFloat:
             df[column] = df[column].astype(float)
+
+        return df
+
+    def getValueAdjusted(self, df):
+        df["value_season_adj"] = (
+            df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10
+        )  # * 10 since it's just easier
 
         return df
 
@@ -127,14 +137,10 @@ class Fantasy:
         return df
 
     def getTopTeam(self):
-        gk_df = self.dfFiltered("element_type", "Goalkeeper", "value_season_adj").head(
-            2
-        )
-        def_df = self.dfFiltered("element_type", "Defender", "value_season_adj").head(5)
-        mid_df = self.dfFiltered("element_type", "Midfielder", "value_season_adj").head(
-            5
-        )
-        fwd_df = self.dfFiltered("element_type", "Forward", "value_season_adj").head(3)
+        gk_df = self.dfFiltered("element_type", "Goalkeeper", "total_points").head(2)
+        def_df = self.dfFiltered("element_type", "Defender", "total_points").head(5)
+        mid_df = self.dfFiltered("element_type", "Midfielder", "total_points").head(5)
+        fwd_df = self.dfFiltered("element_type", "Forward", "total_points").head(3)
 
         top = gk_df.append(def_df).append(mid_df).append(fwd_df)
 
@@ -157,10 +163,13 @@ class Fantasy:
         if regline:
             ax = sns.regplot(x=x, y=y, data=df)
         else:
-            ax = sns.scatterplot(x=x, y=y, data=df, size="now_cost", sizes=(min, max))
+            ax = sns.scatterplot(
+                x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
+            )
 
         fig = plt.gcf()
         fig.set_size_inches(20, 10)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
