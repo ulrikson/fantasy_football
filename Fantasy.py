@@ -114,14 +114,21 @@ class Fantasy:
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-    def get_player_df(self):
+    def get_player_df(self, filter=True):
         df = self.__get_relevant_columns()
         df = self.__map_values(df)
         df = self.__replace_translation(df)
-        df = self.__remove_unwanted_teams(df)
         df = self.__string_to_float(df)
-        df = df[df["now_cost"] < self.max_cost]
         df = self.__get_value_adjusted(df)
+
+        if filter:
+            df = self.__get_filtered_df(df)
+
+        return df
+
+    def __get_filtered_df(self, df):
+        df = self.__remove_unwanted_teams(df)
+        df = df[df["now_cost"] < self.max_cost]
         df = self.__remove_low_values(df)
 
         return df
@@ -205,12 +212,13 @@ class Fantasy:
         return df
 
     def get_top_performers(self):
-        df = self.get_player_df()
+        df = self.get_player_df(filter=False)
+
+        form_top_value = df["form"].quantile(q=0.9)
+        value_top_value = df["value_season_adj"].quantile(q=0.9)
 
         if self.league == "fpl":
-            form_top_value = df["form"].quantile(q=0.8)
-            value_top_value = df["value_season_adj"].quantile(q=0.8)
-            ict_top_value = df["ict_index"].quantile(q=0.8)
+            ict_top_value = df["ict_index"].quantile(q=0.9)
 
             df = df[
                 (df["form"] >= form_top_value)
@@ -218,14 +226,9 @@ class Fantasy:
                 & (df["ict_index"] >= ict_top_value)
             ]
         else:
-            # Higher q:s since no ICT
-            form_top_value = df["form"].quantile(q=0.9)
-            value_top_value = df["value_season_adj"].quantile(q=0.9)
-
             df = df[
                 (df["form"] >= form_top_value)
                 & (df["value_season_adj"] >= value_top_value)
             ]
 
-        return df.sort_values(by=['element_type', 'team'], ascending=False)
-
+        return df.sort_values(by=["element_type", "team"], ascending=False)
