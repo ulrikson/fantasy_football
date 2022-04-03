@@ -55,6 +55,37 @@ class Fantasy:
 
         return df
 
+    def get_top_performers(self):
+        df = self.get_player_df(filter=False)
+
+        form_top_value = df["form"].quantile(q=0.9)
+        value_top_value = df["value_season_adj"].quantile(q=0.9)
+
+        if self.league == "fpl":
+            ict_top_value = df["ict_index"].quantile(q=0.9)
+
+            df = df[
+                (df["form"] >= form_top_value)
+                & (df["value_season_adj"] >= value_top_value)
+                & (df["ict_index"] >= ict_top_value)
+            ]
+        else:
+            df = df[
+                (df["form"] >= form_top_value)
+                & (df["value_season_adj"] >= value_top_value)
+            ]
+
+        return df.sort_values(by=["element_type", "team"], ascending=False)
+
+    def get_top_points(self):
+        df = (
+            self.get_player_df(filter=False)
+            .sort_values("total_points", ascending=False)
+            .head(3)
+        )
+
+        return df
+
     def get_top_team(self):
         gk_df = self.df_filtered("element_type", "Goalkeeper", "total_points").head(2)
         def_df = self.df_filtered("element_type", "Defender", "total_points").head(5)
@@ -69,7 +100,7 @@ class Fantasy:
         pivot = self.create_pivot(column, element).sort_values(element)
 
         fig = plt.gcf()
-        fig.set_size_inches(10, 8)
+        fig.set_size_inches(8, 4)
 
         sns.barplot(x=element, y=column, data=pivot)
 
@@ -210,25 +241,3 @@ class Fantasy:
             df = df.loc[df[key] > value]
 
         return df
-
-    def get_top_performers(self):
-        df = self.get_player_df(filter=False)
-
-        form_top_value = df["form"].quantile(q=0.9)
-        value_top_value = df["value_season_adj"].quantile(q=0.9)
-
-        if self.league == "fpl":
-            ict_top_value = df["ict_index"].quantile(q=0.9)
-
-            df = df[
-                (df["form"] >= form_top_value)
-                & (df["value_season_adj"] >= value_top_value)
-                & (df["ict_index"] >= ict_top_value)
-            ]
-        else:
-            df = df[
-                (df["form"] >= form_top_value)
-                & (df["value_season_adj"] >= value_top_value)
-            ]
-
-        return df.sort_values(by=["element_type", "team"], ascending=False)
