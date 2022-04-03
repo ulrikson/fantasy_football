@@ -19,7 +19,7 @@ class Fantasy:
     def __init__(self, league, unwanted_teams, higher_than, max_cost):
         self.league = league
 
-        self.json = self.getJson()
+        self.json = self.__get_json()
         self.elements_df = pd.DataFrame(self.json["elements"])
         self.elements_types_df = pd.DataFrame(self.json["element_types"])
         self.teams_df = pd.DataFrame(self.json["teams"])
@@ -28,7 +28,7 @@ class Fantasy:
         self.higher_than = higher_than
         self.max_cost = max_cost
 
-    def getJson(self):
+    def __get_json(self):
         if self.league == "fpl":
             url = "https://fantasy.premierleague.com/api/bootstrap-static/"
         else:
@@ -39,7 +39,7 @@ class Fantasy:
 
         return json
 
-    def getPlayerDf(self):
+    def get_player_df(self):
         df = self.elements_df[
             [
                 "web_name",
@@ -61,20 +61,20 @@ class Fantasy:
 
         df["team"] = df.team.map(self.teams_df.set_index("id").name)
 
-        df = self.replaceTranslation(df)
+        df = self.__replace_translation(df)
 
-        df = self.removeUnwantedTeams(df)
-        df = self.stringToFloat(df)
+        df = self.__remove_unwanted_teams(df)
+        df = self.__string_to_float(df)
 
         df = df[df["now_cost"] < self.max_cost]
 
-        df = self.getValueAdjusted(df)
+        df = self.__get_value_adjusted(df)
 
-        df = self.removeLowValues(df)
+        df = self.__remove_low_values(df)
 
         return df
 
-    def replaceTranslation(self, df):
+    def __replace_translation(self, df):
         df["element_type"] = df["element_type"].replace(
             {
                 "Målvakt": "Goalkeeper",
@@ -86,13 +86,13 @@ class Fantasy:
 
         return df
 
-    def removeUnwantedTeams(self, df):
+    def __remove_unwanted_teams(self, df):
         for team in self.unwanted_teams:
             df = df.loc[df.team != team]
 
         return df
 
-    def stringToFloat(self, df):
+    def __string_to_float(self, df):
         columnsShouldBeFloat = [
             "points_per_game",
             "now_cost",
@@ -107,20 +107,20 @@ class Fantasy:
 
         return df
 
-    def getValueAdjusted(self, df):
+    def __get_value_adjusted(self, df):
         df["value_season_adj"] = (
             df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10
         )  # * 10 since it's just easier
 
         return df
 
-    def removeLowValues(self, df):
+    def __remove_low_values(self, df):
         for key, value in self.higher_than.items():
             df = df.loc[df[key] > value]
 
         return df
 
-    def createPivot(self, index, value):
+    def create_pivot(self, index, value):
         df = self.getPlayerDf()
 
         pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
@@ -129,33 +129,33 @@ class Fantasy:
 
         return pivot
 
-    def dfFiltered(self, column, element, sort_by):
+    def df_filtered(self, column, element, sort_by):
         df = self.getPlayerDf()
         df = df.loc[df[column] == element]
         df = df.sort_values(sort_by, ascending=False)
 
         return df
 
-    def getTopTeam(self):
-        gk_df = self.dfFiltered("element_type", "Goalkeeper", "total_points").head(2)
-        def_df = self.dfFiltered("element_type", "Defender", "total_points").head(5)
-        mid_df = self.dfFiltered("element_type", "Midfielder", "total_points").head(5)
-        fwd_df = self.dfFiltered("element_type", "Forward", "total_points").head(3)
+    def get_top_team(self):
+        gk_df = self.df_filtered("element_type", "Goalkeeper", "total_points").head(2)
+        def_df = self.df_filtered("element_type", "Defender", "total_points").head(5)
+        mid_df = self.df_filtered("element_type", "Midfielder", "total_points").head(5)
+        fwd_df = self.df_filtered("element_type", "Forward", "total_points").head(3)
 
         top = gk_df.append(def_df).append(mid_df).append(fwd_df)
 
         return top
 
-    def getBarPlot(self, column, element):
-        pivot = self.createPivot(column, element).sort_values(element)
+    def get_bar_plot(self, column, element):
+        pivot = self.create_pivot(column, element).sort_values(element)
 
         fig = plt.gcf()
         fig.set_size_inches(10, 8)
 
         sns.barplot(x=element, y=column, data=pivot)
 
-    def getPlayerScatterPlot(self, position, x, y):
-        df = self.dfFiltered("element_type", position, "value_season_adj")
+    def get_player_scatterplot(self, position, x, y):
+        df = self.df_filtered("element_type", position, "value_season_adj")
 
         min = df["now_cost"].min()
         max = df["now_cost"].max()
@@ -166,19 +166,19 @@ class Fantasy:
 
         fig = plt.gcf()
         fig.set_size_inches(20, 10)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-    def getMVPScatterPlot(self):
+    def get_mvp_scatterplot(self):
         x = "form"
         y = "value_season_adj"
 
-        top_gk = self.dfFiltered("element_type", "Goalkeeper", "total_points").head()
-        top_def = self.dfFiltered("element_type", "Defender", "total_points").head()
-        top_mid = self.dfFiltered("element_type", "Midfielder", "total_points").head()
-        top_fwd = self.dfFiltered("element_type", "Forward", "total_points").head()
+        top_gk = self.df_filtered("element_type", "Goalkeeper", "total_points").head()
+        top_def = self.df_filtered("element_type", "Defender", "total_points").head()
+        top_mid = self.df_filtered("element_type", "Midfielder", "total_points").head()
+        top_fwd = self.df_filtered("element_type", "Forward", "total_points").head()
 
         df = top_gk.append(top_def).append(top_mid).append(top_fwd)
 
