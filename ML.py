@@ -22,34 +22,11 @@ class ML:
 
         predictions = model.predict(X_test)
         r2 = r2_score(y_test, predictions)
+        adj_r2 = 1 - (1-model.score(X, y))*(len(y)-1)/(len(y)-X.shape[1]-1)
         print("r2: " + str(r2))
-        print(model.coef_)
-        print(model.intercept_)
+        print("Adjusted r2: " + str(adj_r2))
 
         return model
 
-    def linear_regression(self):
+    def predict_linear_regression(self):
         self.__fit_linear_regression()
-
-
-from Fantasy import Fantasy
-
-league = "fpl"
-
-unwanted_teams = []
-
-higher_than = {
-    "value_season": 0,
-    "value_season_adj": 0,
-    "form": 0,
-    "minutes": 0,
-    "points_per_game": 0,
-}
-
-max_cost = 200
-
-fantasy = Fantasy(league, unwanted_teams, higher_than, max_cost)
-
-df = fantasy.get_player_df()
-
-ML(df, "total_points", ["now_cost", "ict_index", "value_season_adj"]).linear_regression()
