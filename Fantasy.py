@@ -104,19 +104,25 @@ class Fantasy:
 
         sns.barplot(x=element, y=column, data=pivot)
 
-    def get_player_scatterplot(self, position, x, y):
+    def get_player_scatterplot(self, position, x, y, regline=False):
         df = self.df_filtered("element_type", position, "value_season_adj")
 
         min = df["now_cost"].min()
         max = df["now_cost"].max()
 
-        ax = sns.scatterplot(
-            x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
-        )
-
         fig = plt.gcf()
         fig.set_size_inches(20, 10)
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
+
+        if regline:
+            correlation_coefficient = df[x].corr(df[y])
+            print("p: " + str(correlation_coefficient)) 
+            ax = sns.regplot(x=x, y=y, data=df)
+        else:
+            ax = sns.scatterplot(
+                x=x, y=y, data=df, size="now_cost", sizes=(min, max), hue="team"
+            )
+
+            plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0)
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
