@@ -115,7 +115,7 @@ class Fantasy:
 
         if regline:
             correlation_coefficient = df[x].corr(df[y])
-            print("p: " + str(correlation_coefficient)) 
+            print("p: " + str(correlation_coefficient))
             ax = sns.regplot(x=x, y=y, data=df)
         else:
             ax = sns.scatterplot(
@@ -151,8 +151,12 @@ class Fantasy:
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-    def get_player_df(self, filter=True):
-        df = self.__get_relevant_columns()
+    def get_player_df(self, filter=True, all_columns=False):
+        if all_columns:
+            df = self.elements_df
+        else:
+            df = self.__get_relevant_columns()
+
         df = self.__map_values(df)
         df = self.__replace_translation(df)
         df = self.__string_to_float(df)
@@ -160,6 +164,29 @@ class Fantasy:
 
         if filter:
             df = self.__get_filtered_df(df)
+
+        return df
+
+    def compare_players(self, players):
+        df = self.get_player_df(filter=False, all_columns=True)
+
+        df = df.loc[df["web_name"].isin(players)]
+
+        columns = [
+            "web_name",
+            "ep_next",
+            "form",
+            "value_season_adj",
+            "points_per_game",
+            "now_cost",
+            "transfers_in_event",
+            "transfers_out_event",
+        ]
+
+        if self.league == "fpl":
+            columns = columns + ["ict_index", "ict_index_rank"]
+
+        df = df[columns].sort_values("ep_next")
 
         return df
 
