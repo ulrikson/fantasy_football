@@ -174,19 +174,17 @@ class Fantasy:
 
         columns = [
             "web_name",
-            "ep_next",
             "form",
+            "ep_next",
             "value_season_adj",
             "points_per_game",
             "now_cost",
-            "transfers_in_event",
-            "transfers_out_event",
         ]
 
         if self.league == "fpl":
             columns = columns + ["ict_index", "ict_index_rank"]
 
-        df = df[columns].sort_values("ep_next")
+        df = df[columns].sort_values("form", ascending=False)
 
         return df
 
@@ -263,8 +261,8 @@ class Fantasy:
         return df
 
     def __get_value_adjusted(self, df):
-        df["value_season_adj"] = (
-            df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10
+        df["value_season_adj"] = round(
+            (df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10), 1
         )  # * 10 since it's just easier
 
         return df
