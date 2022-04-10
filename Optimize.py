@@ -2,14 +2,20 @@ from Fantasy import Fantasy
 
 
 class Optimize:
-    def __init__(self, league, current_team):
+    def __init__(self, league, current_team, in_bank):
         self.current_team = current_team
         self.league = league
+        self.in_bank = in_bank * 10 # due to now_cost
         self.df = self.__current_players_df()
 
     def find_substitutions(self):
+        suggested_sub_in = []
+
         # at risk players are prioritized to be substituted
         at_risk = self.__players_at_risk()
+
+        # look for alternatives to the at risk players
+        # need to get the position and then get the best player in that position (function) for the same money (+ bank)
 
     def __players_at_risk(self):
         df = self.df[self.df["chance_of_playing_next_round"] < 100]
@@ -45,4 +51,6 @@ current_team = [
     "Mateta",
 ]
 
-Optimize("fpl", current_team).find_substitutions()
+in_bank = 0.1
+
+Optimize("fpl", current_team, in_bank).find_substitutions()
