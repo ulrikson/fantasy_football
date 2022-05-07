@@ -251,6 +251,7 @@ class Fantasy:
             "value_season",
             "total_points",
             "form",
+            "ep_next"
         ]
 
         if self.league == "fpl":
