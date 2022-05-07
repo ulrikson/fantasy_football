@@ -1,56 +1,70 @@
 from Fantasy import Fantasy
 
 
-class Optimize:
-    def __init__(self, league, current_team, in_bank):
-        self.current_team = current_team
+class Alternative:
+    def __init__(self, league, player):
         self.league = league
-        self.in_bank = in_bank * 10 # due to now_cost
-        self.df = self.__current_players_df()
+        self.player = player
 
-    def find_substitutions(self):
-        suggested_sub_in = []
+        self.df_all = self.__get_base_df()
+        self.df_alternatives = self.__get_alternatives_df()
+        self.player_stats = self.__get_player_stats()
 
-        # at risk players are prioritized to be substituted
-        at_risk = self.__players_at_risk()
-
-        # look for alternatives to the at risk players
-        # need to get the position and then get the best player in that position (function) for the same money (+ bank)
-
-    def __players_at_risk(self):
-        df = self.df[self.df["chance_of_playing_next_round"] < 100]
-
-        return df["web_name"].tolist()
-
-    def __current_players_df(self):
-        df = self.__base_df()
-        df = df.loc[df["web_name"].isin(self.current_team)]
-
-        return df
-
-    def __base_df(self):
+    def __get_base_df(self):
         df = Fantasy(self.league, [], {}, 2000).get_player_df(False, True)
         return df
 
+    def __get_alternatives_df(self):
+        df = self.df_all
+        df = df[df["web_name"] != self.player]
+        return df
 
-current_team = [
-    "Guaita",
-    "Raya",
-    "Doherty",
-    "Alexander-Arnold",
-    "Cancelo",
-    "Andersen",
-    "Robertson",
-    "Bowen",
-    "Benrahma",
-    "Kulusevski",
-    "De Bruyne",
-    "Son",
-    "Pukki",
-    "Toney",
-    "Mateta",
-]
+    def __get_player_stats(self):
+        df = self.df_all
+        player_stats = df[df["web_name"] == self.player]
+        return player_stats
 
-in_bank = 0.1
+    def better_choice(self):
 
-Optimize("fpl", current_team, in_bank).find_substitutions()
+        self.__filter_by_availability()
+        self.__filter_by_cost()
+        self.__filter_by_form()
+        self.__filter_by_ep()
+
+        print(self.df_alternatives["web_name"].to_list())
+
+    def __filter_by_availability(self):
+        # a player must be 100% available to be interesting
+        df = self.df_alternatives
+        df = df[df["chance_of_playing_next_round"] == 100]
+
+        self.df_alternatives = df
+
+    def __filter_by_cost(self):
+        cost = self.player_stats["now_cost"].iloc[0]
+
+        df = self.df_alternatives
+        df = df[df["now_cost"] <= cost]
+
+        self.df_alternatives = df
+
+    def __filter_by_form(self):
+        # player should have at least the same form
+        form = self.player_stats["form"].iloc[0]
+
+        df = self.df_alternatives
+        df = df[df["form"] >= form]
+
+        self.df_alternatives = df
+
+    def __filter_by_ep(self):
+        # player should have at least as many expected points
+        ep_next = self.player_stats["ep_next"].iloc[0]
+
+        df = self.df_alternatives
+        df = df[df["ep_next"] >= ep_next]
+
+        self.df_alternatives = df
+
+
+Alternative("fpl", "Andersen").better_choice()
