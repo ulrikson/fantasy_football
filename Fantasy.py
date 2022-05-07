@@ -58,10 +58,9 @@ class Fantasy:
     def get_top_performers(self):
         df = self.get_player_df(filter=False)
 
-        form_top_value = df["form"].quantile(q=0.9)
-        value_top_value = df["value_season_adj"].quantile(q=0.9)
-
-        if self.league == "fpl":
+        if self.league == "fpl":        
+            form_top_value = df["form"].quantile(q=0.9)
+            value_top_value = df["value_season_adj"].quantile(q=0.9)
             ict_top_value = df["ict_index"].quantile(q=0.9)
 
             df = df[
@@ -70,6 +69,8 @@ class Fantasy:
                 & (df["ict_index"] >= ict_top_value)
             ]
         else:
+            form_top_value = df["form"].quantile(q=0.95)
+            value_top_value = df["value_season_adj"].quantile(q=0.95)
             df = df[
                 (df["form"] >= form_top_value)
                 & (df["value_season_adj"] >= value_top_value)
