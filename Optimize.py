@@ -110,9 +110,14 @@ class Alternative:
         print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
 
 
-player = "Sana"
-league = "fal"
-bank = 1.2
-same_position = True
+while True:
+    player = input("Player: ")
 
-Alternative(player, league, bank).better_choice(same_position)
+    if player == "exit":
+        break
+
+    league = input("fpl/fal: ")
+    bank = float(input("Bank: "))
+    same_position = bool(input("Same position (0/1): "))
+
+    Alternative(player, league, bank).better_choice(same_position)
