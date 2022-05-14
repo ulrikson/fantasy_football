@@ -38,7 +38,10 @@ class Alternative:
     def __filter_by_availability(self):
         # a player must be 100% available to be interesting
         df = self.df_alternatives
-        df = df[df["chance_of_playing_next_round"] == 100]
+        df = df[
+            (df["chance_of_playing_next_round"] == 100)
+            | (df["chance_of_playing_next_round"].isnull())
+        ]
 
         self.df_alternatives = df
 
@@ -107,9 +110,9 @@ class Alternative:
         print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
 
 
-player = "Salah"
-league = "fpl"
-bank = 0.1
+player = "Sana"
+league = "fal"
+bank = 1.2
 same_position = True
 
 Alternative(player, league, bank).better_choice(same_position)

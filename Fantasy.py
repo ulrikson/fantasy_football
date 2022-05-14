@@ -176,10 +176,10 @@ class Fantasy:
         columns = [
             "web_name",
             "form",
-            "ep_next",
             "value_season_adj",
             "points_per_game",
             "now_cost",
+            "ep_next"
         ]
 
         if self.league == "fpl":
@@ -250,12 +250,12 @@ class Fantasy:
             "minutes",
             "value_season",
             "total_points",
-            "form",
-            "ep_next"
+            "form"
         ]
 
         if self.league == "fpl":
             columnsShouldBeFloat.append("ict_index")
+            columnsShouldBeFloat.append("ep_next")
 
         for column in columnsShouldBeFloat:
             df[column] = df[column].astype(float)
