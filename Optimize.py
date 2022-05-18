@@ -12,6 +12,24 @@ class Optimize:
         df = fantasy.get_player_df(False, True)
         return df
 
+    def pretty_print_df(self, df):
+        headers = [
+            "web_name",
+            "team",
+            "element_type",
+            "ep_next",
+            "form",
+            "now_cost",
+            "value_season_adj",
+        ]
+
+        df = df[headers]
+
+        df = df.sort_values("form", ascending=False)
+        df["now_cost"] = df["now_cost"] / 10
+
+        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
+
 
 class Alternative(Optimize):
     def __init__(self, player, league, in_bank):
@@ -39,23 +57,7 @@ class Alternative(Optimize):
 
     def print_better_choice(self):
         df = self.better_choice()
-
-        headers = [
-            "web_name",
-            "team",
-            "element_type",
-            "ep_next",
-            "form",
-            "now_cost",
-            "value_season_adj",
-        ]
-
-        df = df[headers]
-
-        df = df.sort_values("form", ascending=False)
-        df["now_cost"] = df["now_cost"] / 10
-
-        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
+        self.pretty_print_df(df)
 
     def __filter_by_availability(self):
         # a player must be 100% available to be interesting
@@ -119,23 +121,7 @@ class Best(Optimize):
 
     def for_cost(self, cost):
         df = self.__filter_by_cost(cost)
-
-        headers = [
-            "web_name",
-            "team",
-            "element_type",
-            "ep_next",
-            "form",
-            "now_cost",
-            "value_season_adj",
-        ]
-
-        df = df[headers]
-
-        df = df.sort_values("form", ascending=False)
-        df["now_cost"] = df["now_cost"] / 10
-
-        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
+        self.pretty_print_df(df)
 
     def __filter_by_cost(self, cost):
         df = self.df_all
