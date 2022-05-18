@@ -24,8 +24,6 @@ class Optimize:
         ]
 
         df = df[headers]
-
-        df = df.sort_values("form", ascending=False)
         df["now_cost"] = df["now_cost"] / 10
 
         print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
@@ -57,6 +55,7 @@ class Alternative(Optimize):
 
     def print_better_choice(self):
         df = self.better_choice()
+        df = df.sort_values("form", ascending=False)
         self.pretty_print_df(df)
 
     def __filter_by_availability(self):
@@ -121,10 +120,12 @@ class Best(Optimize):
 
     def for_cost(self, cost):
         df = self.__filter_by_cost(cost)
-        self.pretty_print_df(df)
+        df = df.sort_values("form", ascending=False)
+
+        self.pretty_print_df(df.head(10))
 
     def __filter_by_cost(self, cost):
         df = self.df_all
-        df = df[df["now_cost"] <= cost * 10].head(10)
+        df = df[df["now_cost"] <= cost * 10]
 
         return df
