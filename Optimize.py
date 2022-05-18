@@ -22,18 +22,35 @@ class Alternative:
         player_stats = df[df["web_name"] == self.player]
         return player_stats
 
-    def better_choice(self, same_position):
+    def better_choice(self):
         self.__filter_by_availability()
-
-        if same_position:
-            self.__filter_by_position()
-
+        self.__filter_by_position()
         self.__filter_by_cost()
         self.__filter_by_form()
         self.__filter_by_ep()
         self.__filter_by_value()
 
-        self.__print_results()
+        return self.df_alternatives
+
+    def print_better_choice(self):
+        df = self.better_choice()
+
+        headers = [
+            "web_name",
+            "team",
+            "element_type",
+            "ep_next",
+            "form",
+            "now_cost",
+            "value_season_adj",
+        ]
+
+        df = df[headers]
+
+        df = df.sort_values("form", ascending=False)
+        df["now_cost"] = df["now_cost"] / 10
+
+        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
 
     def __filter_by_availability(self):
         # a player must be 100% available to be interesting
@@ -89,35 +106,3 @@ class Alternative:
         df = df[df["value_season_adj"] >= value_threshold]
 
         self.df_alternatives = df
-
-    def __print_results(self):
-        headers = [
-            "web_name",
-            "team",
-            "element_type",
-            "ep_next",
-            "form",
-            "now_cost",
-            "value_season_adj",
-        ]
-        df = self.df_alternatives[headers]
-        df = df.sort_values("ep_next", ascending=False)
-        df["now_cost"] = df["now_cost"] / 10
-
-        nr_alternatives = len(df) - 1  # player itself is in the df
-
-        print(f"There are {nr_alternatives} alternatives to {self.player}: \n")
-        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
-
-
-while True:
-    player = input("Player: ")
-
-    if player == "exit":
-        break
-
-    league = input("fpl/fal: ")
-    bank = float(input("Bank: "))
-    same_position = bool(input("Same position (0/1): "))
-
-    Alternative(player, league, bank).better_choice(same_position)
