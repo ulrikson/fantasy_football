@@ -1,23 +1,26 @@
 from Fantasy import Fantasy
 from tabulate import tabulate
 
-# TODO: Alternative and Best can share methods
 
-
-class Alternative:
-    def __init__(self, player, league, in_bank):
-        self.player = player
+class Optimize:
+    def __init__(self, league):
         self.league = league
-        self.in_bank = in_bank * 10
-
         self.df_all = self.__get_base_df()
-        self.df_alternatives = self.df_all  # initially
-        self.player_stats = self.__get_player_stats()
 
     def __get_base_df(self):
         fantasy = Fantasy(self.league, [], {}, 2000)
         df = fantasy.get_player_df(False, True)
         return df
+
+
+class Alternative(Optimize):
+    def __init__(self, player, league, in_bank):
+        super().__init__(league)
+
+        self.player = player
+        self.in_bank = in_bank * 10
+        self.df_alternatives = self.df_all  # initially
+        self.player_stats = self.__get_player_stats()
 
     def __get_player_stats(self):
         df = self.df_all
@@ -110,16 +113,9 @@ class Alternative:
         self.df_alternatives = df
 
 
-class Best:
+class Best(Optimize):
     def __init__(self, league):
-        self.league = league
-
-        self.df_all = self.__get_base_df()
-
-    def __get_base_df(self):
-        fantasy = Fantasy(self.league, [], {}, 2000)
-        df = fantasy.get_player_df(False, True)
-        return df
+        super().__init__(league)
 
     def for_cost(self, cost):
         df = self.__filter_by_cost(cost)
@@ -143,6 +139,6 @@ class Best:
 
     def __filter_by_cost(self, cost):
         df = self.df_all
-        df = df[df["now_cost"] <= cost*10].head(10)
+        df = df[df["now_cost"] <= cost * 10].head(10)
 
         return df
