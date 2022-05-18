@@ -1,6 +1,8 @@
 from Fantasy import Fantasy
 from tabulate import tabulate
 
+# TODO: Alternative and Best can share methods
+
 
 class Alternative:
     def __init__(self, player, league, in_bank):
@@ -106,3 +108,41 @@ class Alternative:
         df = df[df["value_season_adj"] >= value_threshold]
 
         self.df_alternatives = df
+
+
+class Best:
+    def __init__(self, league):
+        self.league = league
+
+        self.df_all = self.__get_base_df()
+
+    def __get_base_df(self):
+        fantasy = Fantasy(self.league, [], {}, 2000)
+        df = fantasy.get_player_df(False, True)
+        return df
+
+    def for_cost(self, cost):
+        df = self.__filter_by_cost(cost)
+
+        headers = [
+            "web_name",
+            "team",
+            "element_type",
+            "ep_next",
+            "form",
+            "now_cost",
+            "value_season_adj",
+        ]
+
+        df = df[headers]
+
+        df = df.sort_values("form", ascending=False)
+        df["now_cost"] = df["now_cost"] / 10
+
+        print(tabulate(df, headers=headers, showindex=False, tablefmt="psql"))
+
+    def __filter_by_cost(self, cost):
+        df = self.df_all
+        df = df[df["now_cost"] <= cost*10].head(10)
+
+        return df
