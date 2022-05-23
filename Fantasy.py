@@ -15,6 +15,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+# TODO: This could use some refactoring
+
 class Fantasy:
     def __init__(self, league, unwanted_teams, higher_than, max_cost):
         self.league = league
