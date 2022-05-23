@@ -168,27 +168,6 @@ class Fantasy:
 
         return df
 
-    def compare_players(self, players):
-        df = self.get_player_df(filter=False, all_columns=True)
-
-        df = df.loc[df["web_name"].isin(players)]
-
-        columns = [
-            "web_name",
-            "form",
-            "value_season_adj",
-            "points_per_game",
-            "now_cost",
-            "ep_next"
-        ]
-
-        if self.league == "fpl":
-            columns = columns + ["ict_index", "ict_index_rank"]
-
-        df = df[columns].sort_values("form", ascending=False)
-
-        return df
-
     def __get_filtered_df(self, df):
         df = self.__remove_unwanted_teams(df)
         df = df[df["now_cost"] < self.max_cost]

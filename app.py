@@ -30,3 +30,7 @@ while True:
     elif mode == "cost":
         cost = float(input("Cost: "))
         Best(league).for_cost(cost)
+
+    elif mode == "compare":
+        players = input("Players (,): ").split(",")
+        Best(league).compare_players(players)
