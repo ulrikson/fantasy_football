@@ -129,7 +129,7 @@ class Best(Optimize):
         df = df[df["now_cost"] <= cost * 10]
 
         return df
-    
+
     def compare_players(self, players):
         df = self.df_all
 
