@@ -12,6 +12,7 @@ warnings.filterwarnings("ignore")
 class Base:
     def __init__(self, league):
         self.players_df = pd.read_csv("data/players_" + league + ".csv")
+        self.league = league
 
     def df_filtered(self, column, element, sort_by):
         df = self.get_player_df()
