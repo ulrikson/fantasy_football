@@ -33,7 +33,9 @@ class PlayerDownload(Download):
 
         json = self.get_json(url)
         self.__create_dfs(json)
+
         self.save_df(self.players_df, "data/players_" + self.league + ".csv")
+        self.save_df(self.teams_df, "data/teams_" + self.league + ".csv")
 
     def __create_dfs(self, json):
         self.players_df = pd.DataFrame(json["elements"])
@@ -101,4 +103,37 @@ class PlayerDownload(Download):
         self.players_df = df
 
 
-PlayerDownload("fal").download()
+class FixtureDownload(Download):
+    def __init__(self, league):
+        super().__init__()
+        self.league = league
+
+        self.teams_df = pd.read_csv("data/teams_" + league + ".csv")
+        self.fixtures_df = None
+
+    def download(self):
+        total_events = 38 if self.league == "fpl" else 30
+
+        for i in range(1, total_events + 1):
+            if self.league == "fpl":
+                url = "https://fantasy.premierleague.com/api/fixtures/?event=" + str(i)
+            elif self.league == "fal":
+                url = "https://fantasy.allsvenskan.se/api/fixtures/?event=" + str(i)
+
+            json = self.get_json(url)
+
+            df_gw = pd.DataFrame(json)
+            df_gw = self.__map_values(df_gw)
+
+            if i == 1:
+                self.fixtures_df = df_gw
+            else:
+                self.fixtures_df = pd.concat([self.fixtures_df, df_gw])
+
+        self.save_df(self.fixtures_df, "data/fixtures_" + self.league + ".csv")
+
+    def __map_values(self, df):
+        df["team_h"] = df.team_h.map(self.teams_df.set_index("id").name)
+        df["team_a"] = df.team_a.map(self.teams_df.set_index("id").name)
+
+        return df

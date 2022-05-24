@@ -1,5 +1,5 @@
 from Optimize import Alternative, Best
-from Download import PlayerDownload
+from Download import PlayerDownload, FixtureDownload
 import json
 
 
@@ -37,4 +37,5 @@ while True:
 
     elif mode == "update":
         PlayerDownload(league).download()
+        FixtureDownload(league).download()
         break

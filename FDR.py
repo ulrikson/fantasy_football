@@ -7,23 +7,11 @@ import json
 class FDR:
     def __init__(self, league, gw):
         self.league = league
-        self.teams_df = pd.read_csv("data/teams_" + league + ".csv")
+        self.fixtures_df = pd.read_csv("data/fixtures_" + league + ".csv")
         self.gw = gw
 
-    def __get_fixtures(self):
-        url = "https://fantasy.allsvenskan.se/api/fixtures/?event=" + str(self.gw)
-        response = requests.get(url)
-        json = response.json()
-
-        df = pd.DataFrame(json)
-
-        df["team_h"] = df.team_h.map(self.teams_df.set_index("id").name)
-        df["team_a"] = df.team_a.map(self.teams_df.set_index("id").name)
-
-        return df
-
     def get_fdr_next(self, team):
-        df = self.__get_fixtures()
+        df = self.fixtures_df
         match = df[(df["team_a"] == team) | (df["team_h"] == team)]
 
         team_ground = self.__get_team_ground(match)
@@ -51,4 +39,4 @@ class FDR:
         return difficulty
 
 
-FDR("fal", 10).get_fdr_next("Malmö FF")
+FDR("fal", 10).get_fdr_next("IFK Göteborg")
