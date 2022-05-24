@@ -1,16 +1,11 @@
 import pandas as pd
 import numpy as np
-
 import matplotlib.pyplot as plt
-
-plt.style.use("ggplot")
-
 import seaborn as sns
-
-sns.set_theme(color_codes=True)
-
 import warnings
 
+plt.style.use("ggplot")
+sns.set_theme(color_codes=True)
 warnings.filterwarnings("ignore")
 
 
