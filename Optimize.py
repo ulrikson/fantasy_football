@@ -8,8 +8,8 @@ class Optimize:
         self.df_all = self.__get_base_df()
 
     def __get_base_df(self):
-        fantasy = Fantasy(self.league, [], {}, 2000)
-        df = fantasy.get_player_df(False, True)
+        fantasy = Fantasy(self.league)
+        df = fantasy.get_player_df(True)
         return df
 
     def pretty_print_df(self, df):
