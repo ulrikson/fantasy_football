@@ -3,7 +3,7 @@ import pandas as pd
 
 
 class Download:
-    def __init__(self) -> None:
+    def __init__(self):
         pass
 
     def get_json(self, url):
@@ -19,8 +19,8 @@ class Download:
 class PlayerDownload(Download):
     def __init__(self, league):
         super().__init__()
+        
         self.league = league
-
         self.players_df = None
         self.element_types_df = None
         self.teams_df = None
@@ -106,8 +106,8 @@ class PlayerDownload(Download):
 class FixtureDownload(Download):
     def __init__(self, league):
         super().__init__()
-        self.league = league
 
+        self.league = league
         self.teams_df = pd.read_csv("data/teams_" + league + ".csv")
         self.fixtures_df = None
 
