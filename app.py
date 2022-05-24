@@ -1,6 +1,6 @@
 from Optimize import Alternative, Best
+from Download import Download
 import json
-import pandas as pd
 
 
 while True:
@@ -34,3 +34,7 @@ while True:
     elif mode == "compare":
         players = input("Players (,): ").split(",")
         Best(league).compare_players(players)
+
+    elif mode == "update":
+        Download(league).download()
+        break
