@@ -32,6 +32,9 @@ class Download:
         self.teams_df = pd.DataFrame(json["teams"])
 
         self.__map_values()
+        self.__replace_translation()
+        self.__string_to_float()
+        self.__get_value_adjusted()
 
     def __map_values(self):
         df = self.elements_df
@@ -41,6 +44,50 @@ class Download:
         )
 
         df["team"] = df.team.map(self.teams_df.set_index("id").name)
+
+        self.elements_df = df
+
+    def __replace_translation(self):
+        df = self.elements_df
+
+        df["element_type"] = df["element_type"].replace(
+            {
+                "Målvakt": "Goalkeeper",
+                "Försvarare": "Defender",
+                "Mittfältare": "Midfielder",
+                "Anfallare": "Forward",
+            }
+        )
+
+        self.elements_df = df
+
+    def __string_to_float(self):
+        df = self.elements_df
+
+        columnsShouldBeFloat = [
+            "points_per_game",
+            "now_cost",
+            "minutes",
+            "value_season",
+            "total_points",
+            "form",
+        ]
+
+        if self.league == "fpl":
+            columnsShouldBeFloat.append("ict_index")
+            columnsShouldBeFloat.append("ep_next")
+
+        for column in columnsShouldBeFloat:
+            df[column] = df[column].astype(float)
+
+        self.elements_df = df
+
+    def __get_value_adjusted(self):
+        df = self.elements_df
+
+        df["value_season_adj"] = round(
+            (df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10), 1
+        )  # * 10 since it's just easier
 
         self.elements_df = df
 

@@ -17,13 +17,11 @@ warnings.filterwarnings("ignore")
 
 # TODO: This could use some refactoring
 
-class Fantasy:
-    def __init__(self, league, unwanted_teams, higher_than, max_cost):
-        self.league = league
 
-        self.unwanted_teams = unwanted_teams
-        self.higher_than = higher_than
-        self.max_cost = max_cost
+class Fantasy:
+    def __init__(self, league):
+        self.league = league
+        self.players_df = pd.read_csv("data/players_" + league + ".csv")
 
     def create_pivot(self, index, value):
         df = self.get_player_df()
@@ -42,9 +40,9 @@ class Fantasy:
         return df
 
     def get_top_performers(self):
-        df = self.get_player_df(filter=False)
+        df = self.get_player_df()
 
-        if self.league == "fpl":        
+        if self.league == "fpl":
             form_top_value = df["form"].quantile(q=0.9)
             value_top_value = df["value_season_adj"].quantile(q=0.9)
             ict_top_value = df["ict_index"].quantile(q=0.9)
@@ -66,7 +64,7 @@ class Fantasy:
 
     def get_top_points(self):
         df = (
-            self.get_player_df(filter=False)
+            self.get_player_df()
             .sort_values("total_points", ascending=False)
             .head(3)
         )
@@ -138,26 +136,11 @@ class Fantasy:
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-    def get_player_df(self, filter=True, all_columns=False):
+    def get_player_df(self, all_columns=False):
         if all_columns:
-            df = self.elements_df
+            df = self.players_df
         else:
             df = self.__get_relevant_columns()
-
-        df = self.__map_values(df)
-        df = self.__replace_translation(df)
-        df = self.__string_to_float(df)
-        df = self.__get_value_adjusted(df)
-
-        if filter:
-            df = self.__get_filtered_df(df)
-
-        return df
-
-    def __get_filtered_df(self, df):
-        df = self.__remove_unwanted_teams(df)
-        df = df[df["now_cost"] < self.max_cost]
-        df = self.__remove_low_values(df)
 
         return df
 
@@ -172,61 +155,12 @@ class Fantasy:
             "value_season",
             "total_points",
             "form",
+            "value_season_adj"
         ]
 
         if self.league == "fpl":
             columns.append("ict_index")
 
-        df = self.elements_df[columns]
-
-        return df
-
-    def __replace_translation(self, df):
-        df["element_type"] = df["element_type"].replace(
-            {
-                "Målvakt": "Goalkeeper",
-                "Försvarare": "Defender",
-                "Mittfältare": "Midfielder",
-                "Anfallare": "Forward",
-            }
-        )
-
-        return df
-
-    def __remove_unwanted_teams(self, df):
-        for team in self.unwanted_teams:
-            df = df.loc[df.team != team]
-
-        return df
-
-    def __string_to_float(self, df):
-        columnsShouldBeFloat = [
-            "points_per_game",
-            "now_cost",
-            "minutes",
-            "value_season",
-            "total_points",
-            "form"
-        ]
-
-        if self.league == "fpl":
-            columnsShouldBeFloat.append("ict_index")
-            columnsShouldBeFloat.append("ep_next")
-
-        for column in columnsShouldBeFloat:
-            df[column] = df[column].astype(float)
-
-        return df
-
-    def __get_value_adjusted(self, df):
-        df["value_season_adj"] = round(
-            (df["value_season"] / (df["total_points"] / df["points_per_game"]) * 10), 1
-        )  # * 10 since it's just easier
-
-        return df
-
-    def __remove_low_values(self, df):
-        for key, value in self.higher_than.items():
-            df = df.loc[df[key] > value]
+        df = self.players_df[columns]
 
         return df
