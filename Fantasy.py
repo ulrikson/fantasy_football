@@ -15,9 +15,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# TODO: This could use some refactoring
-
-
 class Fantasy:
     def __init__(self, league):
         self.league = league

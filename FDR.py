@@ -1,21 +1,16 @@
 from black import diff
-from Fantasy import Fantasy
 import requests
 import pandas as pd
 import json
-
-# TODO: This and Fantasy could share lots of methods
 
 
 class FDR:
     def __init__(self, league, gw):
         self.league = league
-        self.teams_df = Fantasy(league, [], {}, 2000).teams_df
+        self.teams_df = pd.read_csv("data/teams_" + league + ".csv")
         self.gw = gw
 
     def __get_fixtures(self):
-        # TODO: Adapt to FPL
-
         url = "https://fantasy.allsvenskan.se/api/fixtures/?event=" + str(self.gw)
         response = requests.get(url)
         json = response.json()

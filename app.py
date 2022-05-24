@@ -1,5 +1,5 @@
 from Optimize import Alternative, Best
-from Download import Download
+from Download import PlayerDownload
 import json
 
 
@@ -36,5 +36,5 @@ while True:
         Best(league).compare_players(players)
 
     elif mode == "update":
-        Download(league).download()
+        PlayerDownload(league).download()
         break
