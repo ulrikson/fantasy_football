@@ -46,7 +46,7 @@ class FDR:
         }
 
     def __get_difficulty(self, opponent, is_home):
-        with open("team_difficulty.json") as json_file:
+        with open("data/team_difficulty.json") as json_file:
             data = json.load(json_file)
 
         difficulty = data[self.league][opponent]

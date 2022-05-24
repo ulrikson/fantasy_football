@@ -10,7 +10,7 @@ while True:
     if mode == "all":
         bank = float(input("Bank: "))
 
-        with open("players.json") as json_file:
+        with open("data/players.json") as json_file:
             data = json.load(json_file)
 
         players = data[league]
