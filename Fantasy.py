@@ -21,25 +21,9 @@ class Fantasy:
     def __init__(self, league, unwanted_teams, higher_than, max_cost):
         self.league = league
 
-        self.json = self.__get_json()
-        self.elements_df = pd.DataFrame(self.json["elements"])
-        self.elements_types_df = pd.DataFrame(self.json["element_types"])
-        self.teams_df = pd.DataFrame(self.json["teams"])
-
         self.unwanted_teams = unwanted_teams
         self.higher_than = higher_than
         self.max_cost = max_cost
-
-    def __get_json(self):
-        if self.league == "fpl":
-            url = "https://fantasy.premierleague.com/api/bootstrap-static/"
-        else:
-            url = "https://fantasy.allsvenskan.se/api/bootstrap-static/"
-
-        response = requests.get(url)
-        json = response.json()
-
-        return json
 
     def create_pivot(self, index, value):
         df = self.get_player_df()
@@ -194,15 +178,6 @@ class Fantasy:
             columns.append("ict_index")
 
         df = self.elements_df[columns]
-
-        return df
-
-    def __map_values(self, df):
-        df["element_type"] = df.element_type.map(
-            self.elements_types_df.set_index("id").singular_name
-        )
-
-        df["team"] = df.team.map(self.teams_df.set_index("id").name)
 
         return df
 
