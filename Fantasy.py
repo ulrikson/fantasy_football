@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import requests
 
 import matplotlib.pyplot as plt
 
@@ -15,19 +14,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-class Fantasy:
+class Base:
     def __init__(self, league):
-        self.league = league
         self.players_df = pd.read_csv("data/players_" + league + ".csv")
-
-    def create_pivot(self, index, value):
-        df = self.get_player_df()
-
-        pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
-
-        pivot = pivot.sort_values(value, ascending=False)
-
-        return pivot
 
     def df_filtered(self, column, element, sort_by):
         df = self.get_player_df()
@@ -35,6 +24,41 @@ class Fantasy:
         df = df.sort_values(sort_by, ascending=False)
 
         return df
+
+    def get_player_df(self, all_columns=False):
+        if all_columns:
+            df = self.players_df
+        else:
+            df = self.__get_relevant_columns()
+
+        return df
+
+    def __get_relevant_columns(self):
+        columns = [
+            "web_name",
+            "team",
+            "element_type",
+            "points_per_game",
+            "now_cost",
+            "minutes",
+            "value_season",
+            "total_points",
+            "form",
+            "value_season_adj",
+        ]
+
+        if self.league == "fpl":
+            columns.append("ict_index")
+
+        df = self.players_df[columns]
+
+        return df
+
+
+class Table(Base):
+    def __init__(self, league):
+        super().__init__(league)
+        self.league = league
 
     def get_top_performers(self):
         df = self.get_player_df()
@@ -60,31 +84,32 @@ class Fantasy:
         return df.sort_values(by=["element_type", "team"], ascending=False)
 
     def get_top_points(self):
-        df = (
-            self.get_player_df()
-            .sort_values("total_points", ascending=False)
-            .head(3)
-        )
+        df = self.get_player_df().sort_values("total_points", ascending=False).head(3)
 
         return df
 
-    def get_top_team(self):
-        gk_df = self.df_filtered("element_type", "Goalkeeper", "total_points").head(2)
-        def_df = self.df_filtered("element_type", "Defender", "total_points").head(5)
-        mid_df = self.df_filtered("element_type", "Midfielder", "total_points").head(5)
-        fwd_df = self.df_filtered("element_type", "Forward", "total_points").head(3)
 
-        top = gk_df.append(def_df).append(mid_df).append(fwd_df)
-
-        return top
+class Graph(Base):
+    def __init__(self, league):
+        super().__init__(league)
+        self.league = league
 
     def get_bar_plot(self, column, element):
-        pivot = self.create_pivot(column, element).sort_values(element)
+        pivot = self.__create_pivot(column, element).sort_values(element)
 
         fig = plt.gcf()
         fig.set_size_inches(8, 4)
 
         sns.barplot(x=element, y=column, data=pivot)
+
+    def __create_pivot(self, index, value):
+        df = self.get_player_df()
+
+        pivot = df.pivot_table(index=index, values=value, aggfunc=np.mean).reset_index()
+
+        pivot = pivot.sort_values(value, ascending=False)
+
+        return pivot
 
     def get_player_scatterplot(self, position, x, y, regline=False):
         df = self.df_filtered("element_type", position, "value_season_adj")
@@ -132,32 +157,3 @@ class Fantasy:
 
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
-
-    def get_player_df(self, all_columns=False):
-        if all_columns:
-            df = self.players_df
-        else:
-            df = self.__get_relevant_columns()
-
-        return df
-
-    def __get_relevant_columns(self):
-        columns = [
-            "web_name",
-            "team",
-            "element_type",
-            "points_per_game",
-            "now_cost",
-            "minutes",
-            "value_season",
-            "total_points",
-            "form",
-            "value_season_adj"
-        ]
-
-        if self.league == "fpl":
-            columns.append("ict_index")
-
-        df = self.players_df[columns]
-
-        return df
