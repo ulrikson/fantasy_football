@@ -19,7 +19,7 @@ class FDR:
         return current_gw
 
     def get_fdr_next(self, team):
-        df = self.fixtures_df
+        df = self.fixtures_df[self.fixtures_df["event"] == self.gw]
         match = df[(df["team_a"] == team) | (df["team_h"] == team)]
 
         team_ground = self.__get_team_ground(match)
@@ -47,4 +47,5 @@ class FDR:
         return difficulty
 
 
-FDR("fal")
+FDR("fal").get_fdr_next("IFK Norrköping")
+FDR("fal").get_fdr_next("IF Elfsborg")
