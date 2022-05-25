@@ -1,4 +1,4 @@
-from Fantasy import Fantasy
+from Fantasy import Base
 from tabulate import tabulate
 
 
@@ -8,7 +8,7 @@ class Optimize:
         self.df_all = self.__get_base_df()
 
     def __get_base_df(self):
-        fantasy = Fantasy(self.league)
+        fantasy = Base(self.league)
         df = fantasy.get_player_df(True)
         return df
 
