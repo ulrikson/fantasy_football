@@ -7,15 +7,27 @@ class FDR:
         self.league = league
         self.fixtures_df = pd.read_csv("data/fixtures_" + league + ".csv")
         self.gw = self.__get_gw()
+        self.teams = self.__get_teams()
 
-    def get_fdr_next(self, team):
+    def get_gw_fdrs(self):
+        teams = list(self.teams.keys())
+        for team in teams:
+            self.__get_fdr_next(team)
+
+    def __get_fdr_next(self, team):
         match = self.__get_match(team)
         team_ground = self.__get_team_ground(match)
         is_home = team_ground["home"] == team
         opponent = team_ground["away"] if is_home else team_ground["home"]
         difficulty = self.__get_difficulty(opponent, is_home)
 
-        print(difficulty)
+        print(f"{team} {str(difficulty)}")
+
+    def __get_teams(self):
+        with open("data/team_difficulty.json") as json_file:
+            data = json.load(json_file)
+
+        return data[self.league]
 
     def __get_gw(self):
         df = self.fixtures_df
@@ -37,11 +49,11 @@ class FDR:
         }
 
     def __get_difficulty(self, opponent, is_home):
-        with open("data/team_difficulty.json") as json_file:
-            data = json.load(json_file)
-
-        difficulty = data[self.league][opponent]
+        difficulty = self.teams[opponent]
 
         difficulty = difficulty * 1.5 if not is_home else difficulty
 
         return difficulty
+
+
+FDR("fal").get_gw_fdrs()
