@@ -4,7 +4,7 @@ import json
 
 
 while True:
-    mode = input("Mode: ")
+    mode = input("Mode (all, player, cost, compare, update): ")
     league = input("League: ")
 
     if mode == "all":

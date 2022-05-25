@@ -24,6 +24,9 @@ class Optimize:
             "fdr"
         ]
 
+        if self.league == "fpl":
+            headers = headers + ["ict_index", "ict_index_rank"]
+
         df = df[headers]
         df["now_cost"] = df["now_cost"] / 10
 
@@ -133,24 +136,8 @@ class Best(Optimize):
 
     def compare_players(self, players):
         df = self.df_all
-
         df = df.loc[df["web_name"].isin(players)]
 
-        columns = [
-            "web_name",
-            "team",
-            "element_type",
-            "form",
-            "value_season_adj",
-            "points_per_game",
-            "now_cost",
-            "ep_next",
-            "fdr"
-        ]
-
-        if self.league == "fpl":
-            columns = columns + ["ict_index", "ict_index_rank"]
-
-        df = df[columns].sort_values("form", ascending=False)
+        df = df.sort_values("form", ascending=False)
 
         self.pretty_print_df(df)
