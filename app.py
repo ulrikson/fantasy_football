@@ -36,6 +36,6 @@ while True:
         Best(league).compare_players(players)
 
     elif mode == "update":
-        PlayerDownload(league).download()
         FixtureDownload(league).download()
+        PlayerDownload(league).download()
         break

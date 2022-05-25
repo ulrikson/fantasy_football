@@ -20,7 +20,7 @@ class Download:
 class PlayerDownload(Download):
     def __init__(self, league):
         super().__init__()
-        
+
         self.league = league
         self.players_df = None
         self.element_types_df = None
@@ -47,7 +47,8 @@ class PlayerDownload(Download):
         self.__replace_translation()
         self.__string_to_float()
         self.__get_value_adjusted()
-
+        self.__get_fdrs()
+    
     def __map_values_players(self):
         df = self.players_df
 
@@ -102,6 +103,9 @@ class PlayerDownload(Download):
         )  # * 10 since it's just easier
 
         self.players_df = df
+    
+    def __get_fdrs(self):
+        self.players_df = FDR(self.league).update_fdrs(self.players_df)
 
 
 class FixtureDownload(Download):
@@ -124,7 +128,6 @@ class FixtureDownload(Download):
             json = self.get_json(url)
 
             df_gw = pd.DataFrame(json)
-            df_gw['fdr'] = ''
             df_gw = self.__map_values(df_gw)
 
             if i == 1:

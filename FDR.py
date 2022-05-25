@@ -9,13 +9,18 @@ class FDR:
         self.gw = self.__get_gw()
         self.teams = self.__get_teams()
 
-    def get_gw_fdrs(self):
+    def update_fdrs(self, players_df):
+        df = players_df
+        df["fdr"] = ""
+
         teams = list(self.teams.keys())
         for team in teams:
             difficulty = self.__get_fdr_next(team)
             
-            print(f"{team} {difficulty}")
+            players_in_team = df['team'] == team
+            df.loc[players_in_team, 'fdr'] = difficulty
 
+        return df
 
     def __get_fdr_next(self, team):
         match = self.__get_match(team)
@@ -57,5 +62,3 @@ class FDR:
         difficulty = difficulty * 1.5 if not is_home else difficulty
 
         return difficulty
-
-FDR("fal").get_gw_fdrs()
