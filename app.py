@@ -3,13 +3,13 @@ from Download import PlayerDownload, FixtureDownload
 import json
 
 
+league = input("League: ")
+bank = float(input("Bank: "))
+
 while True:
     mode = input("Mode (all, player, cost, compare, update): ")
-    league = input("League: ")
 
     if mode == "all":
-        bank = float(input("Bank: "))
-
         with open("data/players.json") as json_file:
             data = json.load(json_file)
 
@@ -23,7 +23,6 @@ while True:
             print(f"{player}: {nr_alternatives}")
 
     elif mode == "player":
-        bank = float(input("Bank: "))
         player = input("Player: ")
         Alternative(player, league, bank).print_better_choice()
 
@@ -38,4 +37,4 @@ while True:
     elif mode == "update":
         FixtureDownload(league).download()
         PlayerDownload(league).download()
-        break
+        print("Update done!")

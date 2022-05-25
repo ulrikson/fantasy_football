@@ -48,7 +48,7 @@ class PlayerDownload(Download):
         self.__string_to_float()
         self.__get_value_adjusted()
         self.__get_fdrs()
-    
+
     def __map_values_players(self):
         df = self.players_df
 
@@ -103,7 +103,7 @@ class PlayerDownload(Download):
         )  # * 10 since it's just easier
 
         self.players_df = df
-    
+
     def __get_fdrs(self):
         self.players_df = FDR(self.league).update_fdrs(self.players_df)
 

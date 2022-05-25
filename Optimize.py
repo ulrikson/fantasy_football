@@ -9,7 +9,7 @@ class Optimize:
 
     def __get_base_df(self):
         fantasy = Base(self.league)
-        df = fantasy.get_player_df(True)
+        df = fantasy.get_player_df(0, True)
         return df
 
     def pretty_print_df(self, df):

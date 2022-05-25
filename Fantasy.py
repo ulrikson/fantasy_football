@@ -14,15 +14,13 @@ class Base:
         self.players_df = pd.read_csv("data/players_" + league + ".csv")
         self.league = league
 
-        self.min_games_played = {"fal": 5, "fpl": 5}
-
-    def get_player_df(self, all_columns=False):
+    def get_player_df(self, min_games_played=5, all_columns=False):
         if all_columns:
             df = self.players_df
         else:
             df = self.__get_relevant_columns()
 
-        df = df[df["minutes"] >= self.min_games_played[self.league] * 90]
+        df = df[df["minutes"] >= min_games_played * 90]
 
         return df
 

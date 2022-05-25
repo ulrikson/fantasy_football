@@ -8,6 +8,7 @@ class FDR:
         self.fixtures_df = pd.read_csv("data/fixtures_" + league + ".csv")
         self.gw = self.__get_gw()
         self.teams = self.__get_teams()
+        self.gws_ahead = 5
 
     def update_fdrs(self, players_df):
         df = players_df
@@ -15,21 +16,28 @@ class FDR:
 
         teams = list(self.teams.keys())
         for team in teams:
-            difficulty = self.__get_fdr_next(team)
-            
-            players_in_team = df['team'] == team
-            df.loc[players_in_team, 'fdr'] = difficulty
+            difficulties = self.__get_fdr_next(team)
+
+            players_in_team = df["team"] == team
+            df.loc[players_in_team, "fdr"] = difficulties
 
         return df
 
     def __get_fdr_next(self, team):
-        match = self.__get_match(team)
-        team_ground = self.__get_team_ground(match)
-        is_home = team_ground["home"] == team
-        opponent = team_ground["away"] if is_home else team_ground["home"]
-        difficulty = self.__get_difficulty(opponent, is_home)
+        difficulties = []
+        for gw in range(self.gw, self.gw + self.gws_ahead):
+            match = self.__get_match(team, gw)
+            team_ground = self.__get_team_ground(match)
+            is_home = team_ground["home"] == team
+            opponent = team_ground["away"] if is_home else team_ground["home"]
+            difficulty = float(self.__get_difficulty(opponent, is_home))
 
-        return difficulty
+            difficulties.append(difficulty)
+
+        average = round(sum(difficulties) / len(difficulties), 1)
+        text = f"{average} {str(difficulties)}"
+
+        return text
 
     def __get_teams(self):
         with open("data/team_difficulty.json") as json_file:
@@ -44,8 +52,8 @@ class FDR:
 
         return current_gw
 
-    def __get_match(self, team):
-        df = self.fixtures_df[self.fixtures_df["event"] == self.gw]
+    def __get_match(self, team, gw):
+        df = self.fixtures_df[self.fixtures_df["event"] == gw]
         match = df[(df["team_a"] == team) | (df["team_h"] == team)]
 
         return match
@@ -61,4 +69,4 @@ class FDR:
 
         difficulty = difficulty * 1.5 if not is_home else difficulty
 
-        return difficulty
+        return float(difficulty)
