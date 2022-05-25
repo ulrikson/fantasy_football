@@ -14,18 +14,15 @@ class Base:
         self.players_df = pd.read_csv("data/players_" + league + ".csv")
         self.league = league
 
-    def df_filtered(self, column, element, sort_by):
-        df = self.get_player_df()
-        df = df.loc[df[column] == element]
-        df = df.sort_values(sort_by, ascending=False)
-
-        return df
+        self.min_games_played = {"fal": 5, "fpl": 5}
 
     def get_player_df(self, all_columns=False):
         if all_columns:
             df = self.players_df
         else:
             df = self.__get_relevant_columns()
+
+        df = df[df["minutes"] >= self.min_games_played[self.league] * 90]
 
         return df
 
@@ -108,7 +105,7 @@ class Graph(Base):
         return pivot
 
     def get_player_scatterplot(self, position, x, y, regline=False):
-        df = self.df_filtered("element_type", position, "value_season_adj")
+        df = self.__df_filtered("element_type", position, "value_season_adj")
 
         min = df["now_cost"].min()
         max = df["now_cost"].max()
@@ -130,26 +127,9 @@ class Graph(Base):
         for i, txt in enumerate(df.web_name):
             ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
 
-    def get_mvp_scatterplot(self):
-        x = "form"
-        y = "value_season_adj"
+    def __df_filtered(self, column, element, sort_by):
+        df = self.get_player_df()
+        df = df.loc[df[column] == element]
+        df = df.sort_values(sort_by, ascending=False)
 
-        top_gk = self.df_filtered("element_type", "Goalkeeper", "total_points").head()
-        top_def = self.df_filtered("element_type", "Defender", "total_points").head()
-        top_mid = self.df_filtered("element_type", "Midfielder", "total_points").head()
-        top_fwd = self.df_filtered("element_type", "Forward", "total_points").head()
-
-        df = top_gk.append(top_def).append(top_mid).append(top_fwd)
-
-        min = df["now_cost"].min()
-        max = df["now_cost"].max()
-
-        ax = sns.scatterplot(
-            x=x, y=y, data=df, hue="element_type", size="now_cost", sizes=(min, max)
-        )
-
-        fig = plt.gcf()
-        fig.set_size_inches(20, 10)
-
-        for i, txt in enumerate(df.web_name):
-            ax.annotate(txt, (df[x].iat[i], df[y].iat[i]))
+        return df
