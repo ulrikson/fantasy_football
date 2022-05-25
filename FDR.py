@@ -10,14 +10,6 @@ class FDR:
         self.fixtures_df = pd.read_csv("data/fixtures_" + league + ".csv")
         self.gw = self.__get_gw()
 
-    def __get_gw(self):
-        df = self.fixtures_df
-
-        df_where_no_stats = df[df["stats"] == "[]"]
-        current_gw = df_where_no_stats["event"].iloc[0]
-
-        return current_gw
-
     def get_fdr_next(self, team):
         df = self.fixtures_df[self.fixtures_df["event"] == self.gw]
         match = df[(df["team_a"] == team) | (df["team_h"] == team)]
@@ -29,6 +21,14 @@ class FDR:
         difficulty = self.__get_difficulty(opponent, is_home)
 
         print(difficulty)
+
+    def __get_gw(self):
+        df = self.fixtures_df
+
+        df_where_no_stats = df[df["stats"] == "[]"]
+        current_gw = df_where_no_stats["event"].iloc[0]
+
+        return current_gw
 
     def __get_team_ground(self, match):
         return {
