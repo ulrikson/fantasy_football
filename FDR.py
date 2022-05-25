@@ -12,7 +12,10 @@ class FDR:
     def get_gw_fdrs(self):
         teams = list(self.teams.keys())
         for team in teams:
-            self.__get_fdr_next(team)
+            difficulty = self.__get_fdr_next(team)
+            
+            print(f"{team} {difficulty}")
+
 
     def __get_fdr_next(self, team):
         match = self.__get_match(team)
@@ -21,7 +24,7 @@ class FDR:
         opponent = team_ground["away"] if is_home else team_ground["home"]
         difficulty = self.__get_difficulty(opponent, is_home)
 
-        print(f"{team} {str(difficulty)}")
+        return difficulty
 
     def __get_teams(self):
         with open("data/team_difficulty.json") as json_file:
@@ -54,6 +57,5 @@ class FDR:
         difficulty = difficulty * 1.5 if not is_home else difficulty
 
         return difficulty
-
 
 FDR("fal").get_gw_fdrs()

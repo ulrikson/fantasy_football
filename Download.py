@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+from FDR import FDR
 
 
 class Download:
@@ -123,6 +124,7 @@ class FixtureDownload(Download):
             json = self.get_json(url)
 
             df_gw = pd.DataFrame(json)
+            df_gw['fdr'] = ''
             df_gw = self.__map_values(df_gw)
 
             if i == 1:
