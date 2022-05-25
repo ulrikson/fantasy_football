@@ -21,6 +21,7 @@ class Optimize:
             "form",
             "now_cost",
             "value_season_adj",
+            "fdr"
         ]
 
         df = df[headers]
@@ -144,6 +145,7 @@ class Best(Optimize):
             "points_per_game",
             "now_cost",
             "ep_next",
+            "fdr"
         ]
 
         if self.league == "fpl":
