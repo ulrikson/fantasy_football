@@ -1,5 +1,6 @@
 from Fantasy import Base
 from tabulate import tabulate
+import json
 
 
 class Optimize:
@@ -21,7 +22,7 @@ class Optimize:
             "form",
             "now_cost",
             "value_season_adj",
-            "fdr"
+            "fdr",
         ]
 
         if self.league == "fpl":
@@ -118,7 +119,7 @@ class Alternative(Optimize):
         self.df_alternatives = df
 
 
-class Best(Optimize):
+class BestPlayer(Optimize):
     def __init__(self, league):
         super().__init__(league)
 
@@ -141,3 +142,22 @@ class Best(Optimize):
         df = df.sort_values("form", ascending=False)
 
         self.pretty_print_df(df)
+
+
+class AllPlayers(Optimize):
+    def __init__(self, league, bank):
+        super().__init__(league)
+        self.bank = bank
+
+    def alternatives(self):
+        with open("data/players.json") as json_file:
+            data = json.load(json_file)
+
+        players = data[self.league]
+
+        for player in players:
+            alternatives = Alternative(player, self.league, self.bank).better_choice()
+
+            nr_alternatives = len(alternatives) - 1 if len(alternatives) > 0 else 0
+
+            print(f"{player}: {nr_alternatives}")
