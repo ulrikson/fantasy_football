@@ -36,12 +36,12 @@ class PlayerDownload(Download):
         self.__create_dfs(json)
 
         self.save_df(self.players_df, "data/players_" + self.league + ".csv")
-        self.save_df(self.teams_df, "data/teams_" + self.league + ".csv")
 
     def __create_dfs(self, json):
         self.players_df = pd.DataFrame(json["elements"])
         self.element_types_df = pd.DataFrame(json["element_types"])
         self.teams_df = pd.DataFrame(json["teams"])
+        self.save_df(self.teams_df, "data/teams_" + self.league + ".csv")
 
         self.__map_values_players()
         self.__replace_translation()
@@ -105,6 +105,7 @@ class PlayerDownload(Download):
         self.players_df = df
 
     def __get_fdrs(self):
+        FixtureDownload(self.league).download()
         self.players_df = FDR(self.league).update_fdrs(self.players_df)
 
 
