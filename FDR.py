@@ -27,6 +27,10 @@ class FDR:
         difficulties = []
         for gw in range(self.gw, self.gw + self.gws_ahead):
             match = self.__get_match(team, gw)
+
+            if len(match.index) == 0:
+                continue
+
             team_ground = self.__get_team_ground(match)
             is_home = team_ground["home"] == team
             opponent = team_ground["away"] if is_home else team_ground["home"]
@@ -58,7 +62,7 @@ class FDR:
 
         return match
 
-    def __get_team_ground(self, match):
+    def __get_team_ground(self, match):        
         return {
             "home": match["team_h"].loc[match.index[0]],
             "away": match["team_a"].loc[match.index[0]],
